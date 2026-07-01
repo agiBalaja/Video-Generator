@@ -1,7 +1,7 @@
 const CACHE_NAME = 'Indo News';
 const urlsToCache = [
-  '/Landing-page/',
-  '/Indo News Video Generator - Edisi Gabungan/index.html',
+  '/Indo-News-Video-Generator---Edisi-Gabungan/',
+  '/Indo-News-Video-Generator---Edisi-Gabungan/index.html',
   // Tambahkan file lain yang diperlukan (CSS, JS, gambar)
 ];
 
