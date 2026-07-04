@@ -1,72 +1,62 @@
-<!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Indo News Video Generator - Edisi Gabungan</title>
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-DV25BYV3TL"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', 'G-DV25BYV3TL');
-    </script>
-    <!-- Original Font Link (preserved as is) -->
-    <link href="https://fonts.googleapis.com" rel="stylesheet">
-    <!-- ORIGINAL STYLES (untouched) -->
+  <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-DV25BYV3TL');
+  </script>
+  <meta name="theme-color" content="#020b1a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Video Generator">
+  <link rel="manifest" href="manifest.json">
 
-<!-- 1. METADATA UNTUK INSTALL DI HP -->
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#020b1a">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Video Generator">
-<link rel="manifest" href="manifest.json">
-
-<!-- 2. TOMBOL INSTALL (akan muncul otomatis di browser) -->
-<script>
-// Menampilkan prompt install jika browser support
-let deferredPrompt;
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-  
-  // Buat tombol install kustom (opsional)
-  const installBtn = document.createElement('button');
-  installBtn.textContent = '📲 Install Aplikasi';
-  installBtn.style.position = 'fixed';
-  installBtn.style.bottom = '20px';
-  installBtn.style.right = '20px';
-  installBtn.style.zIndex = '9999';
-  installBtn.style.padding = '12px 20px';
-  installBtn.style.backgroundColor = '#3b82f6';
-  installBtn.style.color = 'white';
-  installBtn.style.border = 'none';
-  installBtn.style.borderRadius = '40px';
-  installBtn.style.boxShadow = '0 4px 12px rgba(0,0,0,0.2)';
-  installBtn.style.fontWeight = 'bold';
-  installBtn.style.cursor = 'pointer';
-  
-  installBtn.addEventListener('click', async () => {
-    if (deferredPrompt) {
-      deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      console.log(`User response: ${outcome}`);
-      deferredPrompt = null;
-      installBtn.remove();
-    }
+  <script>
+  let deferredPrompt;
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    
+    const installBtn = document.createElement('button');
+    installBtn.textContent = '📲 Install Aplikasi';
+    installBtn.style.position = 'fixed';
+    installBtn.style.bottom = '20px';
+    installBtn.style.right = '20px';
+    installBtn.style.zIndex = '9999';
+    installBtn.style.padding = '12px 20px';
+    installBtn.style.backgroundColor = '#3b82f6';
+    installBtn.style.color = 'white';
+    installBtn.style.border = 'none';
+    installBtn.style.borderRadius = '40px';
+    installBtn.style.boxShadow = '0 4px 12px rgba(0,0,0,0.2)';
+    installBtn.style.fontWeight = 'bold';
+    installBtn.style.cursor = 'pointer';
+    
+    installBtn.addEventListener('click', async () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        console.log(`User response: ${outcome}`);
+        deferredPrompt = null;
+        installBtn.remove();
+      }
+    });
+    
+    document.body.appendChild(installBtn);
   });
+  </script>
   
-  document.body.appendChild(installBtn);
-});
-        </script>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo+Black&family=Bebas+Neue&family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/lucide@latest"></script>
   <style>
-    /* Custom Scrollbar agar senada dengan tema gelap */
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: #1e1e2f; }
     ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 3px; }
@@ -107,7 +97,7 @@ window.addEventListener('beforeinstallprompt', (e) => {
               <i data-lucide="image" class="w-6 h-6 text-slate-400 group-hover:text-amber-400"></i>
             </div>
             <p class="text-sm font-semibold text-slate-200" id="uploadStatusText">Pilih / Seret Gambar</p>
-            <p class="text-xs text-slate-500">Rasio kanvas otomatis menyesuaikan ukuran foto asli</p>
+            <p class="text-xs text-slate-500">Gambar dikompres otomatis agar pemuatan terasa ringan</p>
           </div>
         </div>
       </div>
@@ -115,13 +105,26 @@ window.addEventListener('beforeinstallprompt', (e) => {
       <div class="bg-slate-950 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4">
         <div class="flex items-center gap-2 text-amber-400 font-bold text-sm uppercase tracking-wider">
           <i data-lucide="layout-template" class="w-4 h-4"></i>
-          <span>2. Pilih Gaya Bingkai</span>
+          <span>2. Desain & Efek</span>
         </div>
-        <select id="templateSelector" class="w-full bg-slate-900 border border-slate-700 text-slate-100 rounded-xl py-3 px-4 focus:ring-2 focus:ring-amber-500 focus:outline-none transition-all font-semibold text-sm">
-          <option value="1">Gaya 1: Info Blok Putih Bersih (Aksen Petik Merah)</option>
-          <option value="4">Gaya 4: Breaking News Modern (Badge Merah Atas)</option>
-          <option value="8">Gaya 8: Minimalis Elegan (Garis Batas Samping Kiri)</option>
-        </select>
+        <div class="grid grid-cols-1 gap-4">
+          <div class="space-y-1.5">
+            <label class="block text-xs font-semibold text-slate-300">Pilih Gaya Bingkai</label>
+            <select id="templateSelector" class="w-full bg-slate-900 border border-slate-700 text-slate-100 rounded-xl py-2.5 px-4 focus:ring-2 focus:ring-amber-500 focus:outline-none transition-all font-semibold text-xs">
+              <option value="1">Gaya 1: Info Blok Putih Bersih (Aksen Petik Merah)</option>
+              <option value="4">Gaya 4: Breaking News Modern (Badge Merah Atas)</option>
+              <option value="8">Gaya 8: Minimalis Elegan (Garis Batas Samping Kiri)</option>
+            </select>
+          </div>
+          <div class="space-y-1.5">
+            <label class="block text-xs font-semibold text-slate-300">Pilih Gaya Animasi Masuk</label>
+            <select id="animationSelector" class="w-full bg-slate-900 border border-slate-700 text-slate-100 rounded-xl py-2.5 px-4 focus:ring-2 focus:ring-amber-500 focus:outline-none transition-all font-semibold text-xs">
+              <option value="slide">Slide In (Meluncur Kiri)</option>
+              <option value="fade">Fade In (Memudar Masuk)</option>
+              <option value="zoom">Zoom In (Membesar Dinamis)</option>
+            </select>
+          </div>
+        </div>
       </div>
 
       <div class="bg-slate-950 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4">
@@ -140,7 +143,7 @@ Piala Dunia 2026 dengan 6 Gol</textarea>
       <div class="bg-slate-950 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4">
         <div class="flex items-center gap-2 text-amber-400 font-bold text-sm uppercase tracking-wider">
           <i data-lucide="sliders" class="w-4 h-4"></i>
-          <span>4. Tipografi & Desain</span>
+          <span>4. Tipografi</span>
         </div>
         <div class="grid grid-cols-2 gap-4">
           <div class="space-y-1.5">
@@ -157,13 +160,6 @@ Piala Dunia 2026 dengan 6 Gol</textarea>
             <label class="block text-xs font-semibold text-slate-300">Ukuran Teks (px)</label>
             <input type="number" id="textSize" value="34" min="10" max="150" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none font-semibold" />
           </div>
-        </div>
-        <div class="space-y-2">
-          <div class="flex justify-between items-center text-xs font-semibold text-slate-300">
-            <span>Kegelapan Latar (Overlay Gambar)</span>
-            <span id="overlayVal" class="text-amber-500">30%</span>
-          </div>
-          <input type="range" id="darkOverlayRange" min="0" max="90" value="30" class="w-full accent-amber-500 h-1.5 bg-slate-800 rounded-lg cursor-pointer" />
         </div>
       </div>
 
@@ -183,42 +179,54 @@ Piala Dunia 2026 dengan 6 Gol</textarea>
     </section>
   </main>
 
-  <script>
-    // Inisialisasi ikon Lucide
+    <script>
     lucide.createIcons();
 
     const canvas = document.getElementById('videoCanvas');
     const ctx = canvas.getContext('2d');
     
-    // UI Elements
     const uploadImg = document.getElementById('uploadImg');
     const uploadStatusText = document.getElementById('uploadStatusText');
     const templateSelector = document.getElementById('templateSelector');
+    const animationSelector = document.getElementById('animationSelector');
     const textInput = document.getElementById('textInput');
     const textSizeInput = document.getElementById('textSize');
     const fontFamilySelector = document.getElementById('fontFamilySelector');
-    const darkOverlayRange = document.getElementById('darkOverlayRange');
-    const overlayVal = document.getElementById('overlayVal');
     const recordBtn = document.getElementById('recordBtn');
     const statusDiv = document.getElementById('status');
 
     let bgImage = null;
     let isDragging = false;
     let activeTemplate = "1";
+    let activeAnimation = "slide";
     
-    // Koordinat dasar teks (Bisa digeser)
     let textGroup = { x: 50, y: 220 };
 
-    // Timeline Tracker untuk Animasi Sekuensial yang Halus
-    let currentFrame = 0;
-    const fps = 30; 
-    let isRecording = false;
+    // SINKRONISASI BERBASIS WAKTU & FRAME
+    let startTime = 0;              
+    let elapsedTime = 0;            
+    let audioPlayedSet = new Set(); 
+    const DURATION_PER_LINE = 800;  
+    const DELAY_BETWEEN_LINES = 500; 
 
-    // AUDIO SYSTEM (Sintesis Suara Menggunakan Web Audio API)
+    let isRecording = false;
+    const FPS = 30;
+    let recordFrameCount = 0;
+
+    function resetAnimation() {
+      if (!isRecording) {
+        startTime = performance.now();
+        elapsedTime = 0;
+        audioPlayedSet.clear();
+      }
+    }
+
+    resetAnimation();
+
+    // AUDIO SYSTEM
     let audioCtx = null;
     let audioDest = null;
 
-    // Menginisiasi AudioContext secara aman setelah interaksi pengguna
     function getAudioContext() {
       if (!audioCtx) {
         audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -230,60 +238,53 @@ Piala Dunia 2026 dengan 6 Gol</textarea>
       return audioCtx;
     }
 
-    // Fungsi Sintesis Suara "Slide In" (Swoosh + Ding/Chime)
-    function playSlideSound() {
+    // Fungsi suara menerima parameter "timeOffset" agar bunyi tepat pada waktunya
+    function playSlideSound(timeOffset = 0) {
       try {
         const context = getAudioContext();
         if (!context) return;
+        
+        // KUNCI SINKRONISASI: Jika sedang merekam, gunakan timeline AudioContext masa depan yang sinkron dengan frame
+        const now = isRecording ? context.currentTime + timeOffset : context.currentTime;
 
-        const now = context.currentTime;
-
-        // 1. Efek "Swoosh" (Frekuensi Rendah Meluncur ke Atas)
         const osc1 = context.createOscillator();
         const gain1 = context.createGain();
         osc1.type = 'triangle';
-        osc1.frequency.setValueAtTime(80, now);
-        osc1.frequency.exponentialRampToValueAtTime(380, now + 0.3); // Frekuensi naik cepat
+        osc1.frequency.setValueAtTime(100, now);
+        osc1.frequency.exponentialRampToValueAtTime(450, now + 0.25);
 
         gain1.gain.setValueAtTime(0.01, now);
-        gain1.gain.linearRampToValueAtTime(0.12, now + 0.1); // Fade-in cepat
-        gain1.gain.exponentialRampToValueAtTime(0.01, now + 0.35); // Fade-out lembut
+        gain1.gain.linearRampToValueAtTime(0.15, now + 0.08);
+        gain1.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
 
         osc1.connect(gain1);
-        gain1.connect(context.destination); // Terdengar di speaker user
-        if (audioDest) {
-          gain1.connect(audioDest); // Dikirim ke rekaman video
-        }
+        gain1.connect(context.destination);
+        if (audioDest) gain1.connect(audioDest);
         
         osc1.start(now);
-        osc1.stop(now + 0.4);
+        osc1.stop(now + 0.3);
 
-        // 2. Efek "Digital Beep/Chime" (Sinyal Suara News Modern di Akhir Slide)
         const osc2 = context.createOscillator();
         const gain2 = context.createGain();
         osc2.type = 'sine';
-        osc2.frequency.setValueAtTime(1100, now + 0.12);
-        osc2.frequency.exponentialRampToValueAtTime(1400, now + 0.22);
+        osc2.frequency.setValueAtTime(1200, now + 0.1);
+        osc2.frequency.exponentialRampToValueAtTime(1500, now + 0.2);
 
-        gain2.gain.setValueAtTime(0.01, now + 0.12);
-        gain2.gain.linearRampToValueAtTime(0.04, now + 0.15); 
-        gain2.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+        gain2.gain.setValueAtTime(0.01, now + 0.1);
+        gain2.gain.linearRampToValueAtTime(0.05, now + 0.12);
+        gain2.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
 
         osc2.connect(gain2);
-        gain2.connect(context.destination); // Terdengar di speaker user
-        if (audioDest) {
-          gain2.connect(audioDest); // Dikirim ke rekaman video
-        }
+        gain2.connect(context.destination);
+        if (audioDest) gain2.connect(audioDest);
 
-        osc2.start(now + 0.12);
-        osc2.stop(now + 0.4);
-
+        osc2.start(now + 0.1);
+        osc2.stop(now + 0.3);
       } catch (e) {
-        console.warn("Gagal memutar audio transisi: ", e);
+        console.warn("Gagal memutar audio: ", e);
       }
     }
 
-    // Aktifkan Audio Context pada gestur ketukan pertama di halaman
     const unlockAudio = () => {
       getAudioContext();
       document.removeEventListener('click', unlockAudio);
@@ -292,11 +293,6 @@ Piala Dunia 2026 dengan 6 Gol</textarea>
     document.addEventListener('click', unlockAudio);
     document.addEventListener('keydown', unlockAudio);
 
-    function resetAnimation() {
-      if (!isRecording) currentFrame = 0;
-    }
-
-    // Pendengar Event Input Kontrol
     textInput.addEventListener('input', resetAnimation);
     textSizeInput.addEventListener('input', resetAnimation);
     fontFamilySelector.addEventListener('change', resetAnimation);
@@ -304,38 +300,65 @@ Piala Dunia 2026 dengan 6 Gol</textarea>
       activeTemplate = e.target.value;
       resetAnimation();
     });
-
-    darkOverlayRange.addEventListener('input', function() {
-      overlayVal.innerText = `${darkOverlayRange.value}%`;
+    animationSelector.addEventListener('change', function(e) {
+      activeAnimation = e.target.value;
+      resetAnimation();
     });
 
-    // Pemuatan Gambar Lokal Dinamis Mengikuti Dimensi Asli Foto
+    // Pemuatan gambar
     uploadImg.addEventListener('change', function(e) {
       const file = e.target.files[0];
       if (!file) return;
 
+      uploadStatusText.innerText = "Memproses gambar...";
       const reader = new FileReader();
+      
       reader.onload = function(event) {
-        bgImage = new Image();
-        bgImage.onload = function() {
-          // Atur lebar & tinggi canvas pas sesuai ukuran pixel gambar asli yang diunggah
-          canvas.width = bgImage.width;
-          canvas.height = bgImage.height;
-          
-          // Posisi default diletakkan strategis di area kiri bawah gambar
-          textGroup.x = canvas.width * 0.08;
-          textGroup.y = canvas.height * 0.58;
-          
-          uploadStatusText.innerText = "Gambar Berhasil Dimuat!";
-          recordBtn.disabled = false;
-          resetAnimation();
+        const tempImg = new Image();
+        tempImg.onload = function() {
+          const MAX_WIDTH = 1280;
+          const MAX_HEIGHT = 1280;
+          let width = tempImg.width;
+          let height = tempImg.height;
+
+          if (width > height) {
+            if (width > MAX_WIDTH) {
+              height *= MAX_WIDTH / width;
+              width = MAX_WIDTH;
+            }
+          } else {
+            if (height > MAX_HEIGHT) {
+              width *= MAX_HEIGHT / height;
+              height = MAX_HEIGHT;
+            }
+          }
+
+          const offscreenCanvas = document.createElement('canvas');
+          offscreenCanvas.width = width;
+          offscreenCanvas.height = height;
+          const offscreenCtx = offscreenCanvas.getContext('2d');
+          offscreenCtx.drawImage(tempImg, 0, 0, width, height);
+
+          bgImage = new Image();
+          bgImage.onload = function() {
+            canvas.width = width;
+            canvas.height = height;
+            
+            textGroup.x = canvas.width * 0.08;
+            textGroup.y = canvas.height * 0.58;
+            
+            uploadStatusText.innerText = "Gambar Dimuat (Ringan & Optimal)!";
+            recordBtn.disabled = false;
+            resetAnimation();
+          };
+          bgImage.src = offscreenCanvas.toDataURL('image/jpeg', 0.85);
         };
-        bgImage.src = event.target.result;
+        tempImg.src = event.target.result;
       };
       reader.readAsDataURL(file);
     });
 
-    // Fitur Seret & Geser (Drag Support) untuk Mouse & Layar Sentuh HP
+    // Fitur Drag Support
     let startX, startY;
     function checkInTextRange(x, y) {
       return (x >= textGroup.x - 60 && x <= textGroup.x + (canvas.width * 0.8) &&
@@ -370,126 +393,122 @@ Piala Dunia 2026 dengan 6 Gol</textarea>
     canvas.addEventListener('touchmove', (e) => { if(isDragging && e.touches.length === 1) onMove(e.touches[0].clientX, e.touches[0].clientY); }, { passive: true });
     window.addEventListener('touchend', () => { isDragging = false; });
 
-
-    // Fungsi Render Utama Frame Kedalam Canvas
+    // FUNGSI RENDER UTAMA
     function draw() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       if (bgImage) {
-        // 1. Gambar Gambar Latar Belakang
         ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
 
-        // 2. Lapisan Gelap Kustom (Overlay Redup)
-        const opacity = parseFloat(darkOverlayRange.value) / 100;
-        ctx.fillStyle = `rgba(0, 0, 0, ${opacity})`;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        // Update hitungan waktu
+        if (!isRecording) {
+          elapsedTime = performance.now() - startTime;
+        } else {
+          elapsedTime = (recordFrameCount / FPS) * 1000;
+          recordFrameCount++;
+        }
 
-        // Membagi teks masukan per baris baru
         const lines = textInput.value.split('\n').filter(line => line.trim() !== "");
         const baseSize = parseInt(textSizeInput.value) || 24;
         const selectedFont = fontFamilySelector.value;
         
         let currentYOffset = 0;
 
-        // Aturan waktu animasi masuk bertahap (Sekuensial)
-        const framesPerLine = 30;    // Durasi meluncur lambat per baris (~1 detik)
-        const delayBetweenLines = 20; // Jeda tunggu giliran antar baris selanjutnya
-
         lines.forEach((line, index) => {
-          // Menentukan logika skala ukuran font berbasis baris ke berapa
           const size = index === 0 ? baseSize : baseSize * 0.75;
           const paddingX = index === 0 ? 18 : 14;
           const paddingY = index === 0 ? 14 : 10;
           
-          // Menghitung titik awal mulai bergerak meluncur
-          const startFrame = index * (framesPerLine + delayBetweenLines);
-
-          // TRIGER SUARA TRANSISI: Bunyi pas di frame pertama animasi baris bersangkutan dimulai
-          if (currentFrame === startFrame && !isDragging) {
-            playSlideSound();
-          }
-          
+          const startTimeLine = index * (DURATION_PER_LINE + DELAY_BETWEEN_LINES);
           let progress = 0;
-          if (currentFrame >= startFrame) {
-            progress = (currentFrame - startFrame) / framesPerLine;
-            if (progress > 1) progress = 1;
+          if (elapsedTime >= startTimeLine) {
+            progress = Math.min((elapsedTime - startTimeLine) / DURATION_PER_LINE, 1);
           }
 
-          // Rumus Easing Melambat di Akhir (EaseOutQuad) agar halus
+          // PERBAIKAN SINKRONISASI UTAMA: Pemicuan suara dikunci dengan progress animasi baris
+          if (progress > 0 && !audioPlayedSet.has(index)) {
+            audioPlayedSet.add(index);
+            // Jika sedang merekam, hitung delay presisi terhadap mulainya rekaman (dalam detik)
+            const delayInSeconds = isRecording ? startTimeLine / 1000 : 0;
+            playSlideSound(delayInSeconds);
+          }
+
           const easeOutQuad = 1 - (1 - progress) * (1 - progress);
-          
-          // Menghitung pergeseran koordinat horizontal dari kiri luar layar ke titik tujuan asli
-          const currentX = -canvas.width + (textGroup.x + canvas.width) * easeOutQuad;
           const yPos = textGroup.y + currentYOffset;
 
           ctx.save();
           ctx.font = `bold ${size}px ${selectedFont}`;
           const textWidth = ctx.measureText(line).width;
 
-          // ==========================================
-          // LOGIKA PENGGABUNGAN TEMPLATE BINGKAI
-          // ==========================================
+          let currentX = textGroup.x;
+          let currentAlpha = 1;
+          let scale = 1;
+
+          if (activeAnimation === "slide") {
+            currentX = -canvas.width + (textGroup.x + canvas.width) * easeOutQuad;
+          } else if (activeAnimation === "fade") {
+            currentAlpha = easeOutQuad;
+          } else if (activeAnimation === "zoom") {
+            scale = 0.3 + (0.7 * easeOutQuad);
+            currentAlpha = easeOutQuad;
+          }
+
+          ctx.translate(currentX, yPos);
+          if (activeAnimation === "zoom") {
+            ctx.scale(scale, scale);
+          }
+          ctx.globalAlpha = currentAlpha;
+
+          // Bingkai Render
           if (activeTemplate === "1") {
-            // Gaya 1: Blok Putih Bersih dengan Aksen Tanda Petik Merah Merdeka
             ctx.fillStyle = '#ffffff';
-            ctx.fillRect(currentX, yPos, textWidth + (paddingX * 2), size + (paddingY * 2));
+            ctx.fillRect(0, 0, textWidth + (paddingX * 2), size + (paddingY * 2));
             
             ctx.fillStyle = '#000000';
-            ctx.fillText(line, currentX + paddingX, yPos + size + (paddingY / 2));
+            ctx.fillText(line, paddingX, size + (paddingY / 2));
 
-            // Aksen tanda petik merah eksklusif di baris pertama
             if (index === 0) {
               ctx.font = `bold ${size * 1.5}px Georgia, serif`;
               ctx.fillStyle = '#ef4444';
-              ctx.fillText("“", currentX - (size * 0.55), yPos + (size * 0.85));
+              ctx.fillText("“", -(size * 0.55), size * 0.85);
             }
-
             currentYOffset += size + (paddingY * 2) + 7;
 
           } else if (activeTemplate === "4") {
-            // Gaya 4: Breaking News Modern (Menggunakan Kotak Gelap Beraksen Merah)
             if (index === 0) {
-              // Gambar badge penanda kecil "NEWS" di bagian atas headline
-              ctx.fillStyle = '#dc2626'; // Merah solid
-              ctx.fillRect(currentX, yPos - (size * 0.75), size * 1.8, size * 0.55);
+              ctx.fillStyle = '#dc2626';
+              ctx.fillRect(0, -(size * 0.75), size * 1.8, size * 0.55);
               ctx.fillStyle = '#ffffff';
               ctx.font = `bold ${size * 0.3}px ${selectedFont}`;
-              ctx.fillText("NEWS", currentX + 10, yPos - (size * 0.38));
+              ctx.fillText("NEWS", 10, -(size * 0.38));
             }
 
             ctx.font = `bold ${size}px ${selectedFont}`;
-            ctx.fillStyle = 'rgba(15, 23, 42, 0.95)'; // Background biru gelap/hitam slate
-            ctx.fillRect(currentX, yPos, textWidth + (paddingX * 2), size + (paddingY * 2));
+            ctx.fillStyle = 'rgba(15, 23, 42, 0.95)';
+            ctx.fillRect(0, 0, textWidth + (paddingX * 2), size + (paddingY * 2));
             
-            ctx.fillStyle = '#ffffff'; // Teks berwarna putih kontras
-            ctx.fillText(line, currentX + paddingX, yPos + size + (paddingY / 2));
-
+            ctx.fillStyle = '#ffffff';
+            ctx.fillText(line, paddingX, size + (paddingY / 2));
             currentYOffset += size + (paddingY * 2) + 7;
 
           } else if (activeTemplate === "8") {
-            // Gaya 8: Minimalis Elegan (Teks Transparan dengan Garis Batas Vertikal Tebal di Samping Kiri)
-            ctx.fillStyle = '#ffffff'; // Warna Batas Aksen Vertikal Putih Cerah
-            ctx.fillRect(currentX, yPos, 8, size + paddingY);
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, 8, size + paddingY);
             
             ctx.fillStyle = '#ffffff';
-            // Menambahkan efek bayangan teks tebal (Shadow-drop) agar tetap terbaca jelas tanpa box
             ctx.shadowColor = "rgba(0, 0, 0, 0.9)";
             ctx.shadowBlur = 6;
             ctx.shadowOffsetX = 3;
             ctx.shadowOffsetY = 3;
 
-            ctx.fillText(line, currentX + 22, yPos + size - 2);
-            currentYOffset += size + (paddingY * 2) + 7;  // jika ingin spasi seperti gaya lain
+            ctx.fillText(line, 22, size - 2);
+            currentYOffset += size + (paddingY * 2) + 7;
           }
 
           ctx.restore();
         });
 
-        // Majukan timeline frame jika posisi teks tidak sedang di-drag manual
-        if (!isDragging) currentFrame++;
-
       } else {
-        // Tampilan petunjuk awal bilamana foto kosong
         ctx.fillStyle = "#1e293b";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.fillStyle = "#94a3b8";
@@ -502,25 +521,24 @@ Piala Dunia 2026 dengan 6 Gol</textarea>
       requestAnimationFrame(draw);
     }
 
-    // Aktifkan loop canvas pertama kali
     draw();
 
-    // Logika Rekam & Ekspor Video Kualitas Tinggi Berdurasi 5 Detik
+    // REKAM VIDEO DENGAN AUDIO ANTRIAN PRESET
     recordBtn.addEventListener('click', () => {
       if (!bgImage) return;
 
-      // Pastikan Audio Context sudah aktif sebelum merekam
       getAudioContext();
 
       isRecording = true;
-      currentFrame = 0; // Mulai timeline pas dari awal
+      recordFrameCount = 0;
+      audioPlayedSet.clear();
+
       recordBtn.disabled = true;
       statusDiv.innerText = "Merekam animasi video & audio (5 detik)...";
 
-      const canvasStream = canvas.captureStream(fps);
+      const canvasStream = canvas.captureStream(FPS);
       let combinedStream = canvasStream;
 
-      // GABUNGKAN TRACK AUDIO KE VIDEO STREAM (Untuk merekam suara sintetis ke hasil download)
       if (audioCtx && audioDest) {
         const audioTracks = audioDest.stream.getAudioTracks();
         if (audioTracks.length > 0) {
@@ -531,13 +549,9 @@ Piala Dunia 2026 dengan 6 Gol</textarea>
         }
       }
       
-      // Pilih codec yang didukung oleh browser secara berurutan
       let options = { mimeType: 'video/webm;codecs=vp9', videoBitsPerSecond: 6000000 };
       if (!MediaRecorder.isTypeSupported(options.mimeType)) {
         options = { mimeType: 'video/webm;codecs=vp8', videoBitsPerSecond: 6000000 };
-      }
-      if (!MediaRecorder.isTypeSupported(options.mimeType)) {
-        options = { mimeType: 'video/mp4', videoBitsPerSecond: 6000000 };
       }
 
       const mediaRecorder = new MediaRecorder(combinedStream, options);
@@ -551,7 +565,6 @@ Piala Dunia 2026 dengan 6 Gol</textarea>
         const blob = new Blob(chunks, { type: options.mimeType });
         const url = URL.createObjectURL(blob);
         
-        // Eksekusi trigger download otomatis
         const a = document.createElement('a');
         a.href = url;
         a.download = `Infografis_Animasi_News_${Date.now()}.webm`;
@@ -559,16 +572,18 @@ Piala Dunia 2026 dengan 6 Gol</textarea>
         a.click();
         document.body.removeChild(a);
 
-        statusDiv.innerText = "Selesai! Video dengan musik efek berhasil diunduh.";
+        statusDiv.innerText = "Selesai! Video berhasil diunduh secara sinkron.";
         recordBtn.disabled = false;
         isRecording = false;
+        resetAnimation();
       };
 
       mediaRecorder.start();
       setTimeout(() => {
         mediaRecorder.stop();
-      }, 5000); // 5000ms = 5 Detik
+      }, 5000);
     });
   </script>
+
 </body>
-                                                                                                                           </html>
+</html>
