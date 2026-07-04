@@ -2,7 +2,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Indo News Video Generator - Edisi Gabungan</title>
+  <title>Indo News Video Generator - Edisi Audio</title>
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-DV25BYV3TL"></script>
   <script>
       window.dataLayer = window.dataLayer || [];
@@ -142,8 +142,20 @@ Piala Dunia 2026 dengan 6 Gol</textarea>
 
       <div class="bg-slate-950 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4">
         <div class="flex items-center gap-2 text-amber-400 font-bold text-sm uppercase tracking-wider">
+          <i data-lucide="music" class="w-4 h-4"></i>
+          <span>4. Musik Latar Belakang (BGM)</span>
+        </div>
+        <div class="space-y-1.5">
+          <label class="block text-xs font-semibold text-slate-300">Pilih File Lagu (.mp3 / .wav):</label>
+          <input type="file" id="uploadAudio" accept="audio/*" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500" />
+          <p class="text-[11px] text-slate-500">Musik otomatis mengulang (loop) saat pembuatan video.</p>
+        </div>
+      </div>
+
+      <div class="bg-slate-950 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4">
+        <div class="flex items-center gap-2 text-amber-400 font-bold text-sm uppercase tracking-wider">
           <i data-lucide="sliders" class="w-4 h-4"></i>
-          <span>4. Tipografi</span>
+          <span>5. Tipografi</span>
         </div>
         <div class="grid grid-cols-2 gap-4">
           <div class="space-y-1.5">
@@ -179,13 +191,14 @@ Piala Dunia 2026 dengan 6 Gol</textarea>
     </section>
   </main>
 
-    <script>
+  <script>
     lucide.createIcons();
 
     const canvas = document.getElementById('videoCanvas');
     const ctx = canvas.getContext('2d');
     
     const uploadImg = document.getElementById('uploadImg');
+    const uploadAudio = document.getElementById('uploadAudio'); // Deklarasi input audio baru
     const uploadStatusText = document.getElementById('uploadStatusText');
     const templateSelector = document.getElementById('templateSelector');
     const animationSelector = document.getElementById('animationSelector');
@@ -205,7 +218,6 @@ Piala Dunia 2026 dengan 6 Gol</textarea>
     // SINKRONISASI BERBASIS WAKTU & FRAME
     let startTime = 0;              
     let elapsedTime = 0;            
-    let audioPlayedSet = new Set(); 
     const DURATION_PER_LINE = 800;  
     const DELAY_BETWEEN_LINES = 500; 
 
@@ -217,15 +229,16 @@ Piala Dunia 2026 dengan 6 Gol</textarea>
       if (!isRecording) {
         startTime = performance.now();
         elapsedTime = 0;
-        audioPlayedSet.clear();
+        // Jalankan musik di mode preview live
+        playBackgroundMusic(0);
       }
     }
 
-    resetAnimation();
-
-    // AUDIO SYSTEM
+    // AUDIO SYSTEM BARU (BGM PLAYER)
     let audioCtx = null;
     let audioDest = null;
+    let audioBuffer = null;
+    let currentSource = null;
 
     function getAudioContext() {
       if (!audioCtx) {
@@ -238,50 +251,63 @@ Piala Dunia 2026 dengan 6 Gol</textarea>
       return audioCtx;
     }
 
-    // Fungsi suara menerima parameter "timeOffset" agar bunyi tepat pada waktunya
-    function playSlideSound(timeOffset = 0) {
-      try {
+    // Mengolah file audio yang diunggah user
+    uploadAudio.addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      statusDiv.innerText = "Memproses file musik...";
+      const reader = new FileReader();
+      
+      reader.onload = function(event) {
         const context = getAudioContext();
-        if (!context) return;
-        
-        // KUNCI SINKRONISASI: Jika sedang merekam, gunakan timeline AudioContext masa depan yang sinkron dengan frame
-        const now = isRecording ? context.currentTime + timeOffset : context.currentTime;
+        context.decodeAudioData(event.target.result, function(buffer) {
+          audioBuffer = buffer;
+          statusDiv.innerText = "🎵 Musik latar berhasil dimuat!";
+          resetAnimation();
+        }, function(err) {
+          console.error("Gagal decode audio:", err);
+          statusDiv.innerText = "❌ Format audio tidak didukung.";
+        });
+      };
+      reader.readAsArrayBuffer(file);
+    });
 
-        const osc1 = context.createOscillator();
-        const gain1 = context.createGain();
-        osc1.type = 'triangle';
-        osc1.frequency.setValueAtTime(100, now);
-        osc1.frequency.exponentialRampToValueAtTime(450, now + 0.25);
+    // Fungsi memutar musik latar
+    function playBackgroundMusic(timeOffset = 0) {
+      if (!audioBuffer) return;
+      
+      const context = getAudioContext();
+      
+      // Stop lagu sebelumnya jika sedang berjalan agar tidak menumpuk
+      if (currentSource) {
+        try { currentSource.stop(); } catch(e) {}
+      }
 
-        gain1.gain.setValueAtTime(0.01, now);
-        gain1.gain.linearRampToValueAtTime(0.15, now + 0.08);
-        gain1.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+      currentSource = context.createBufferSource();
+      currentSource.buffer = audioBuffer;
+      currentSource.loop = true; // Musik otomatis berulang
 
-        osc1.connect(gain1);
-        gain1.connect(context.destination);
-        if (audioDest) gain1.connect(audioDest);
-        
-        osc1.start(now);
-        osc1.stop(now + 0.3);
+      // Node volume (mengurangi volume background agar suara seimbang, contoh: 50%)
+      const gainNode = context.createGain();
+      gainNode.gain.setValueAtTime(0.5, context.currentTime);
 
-        const osc2 = context.createOscillator();
-        const gain2 = context.createGain();
-        osc2.type = 'sine';
-        osc2.frequency.setValueAtTime(1200, now + 0.1);
-        osc2.frequency.exponentialRampToValueAtTime(1500, now + 0.2);
+      currentSource.connect(gainNode);
+      gainNode.connect(context.destination); // Sambungkan ke speaker
+      if (audioDest) gainNode.connect(audioDest); // Sambungkan ke perekam video
 
-        gain2.gain.setValueAtTime(0.01, now + 0.1);
-        gain2.gain.linearRampToValueAtTime(0.05, now + 0.12);
-        gain2.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+      if (isRecording) {
+        currentSource.start(context.currentTime + timeOffset);
+      } else {
+        currentSource.start(0);
+      }
+    }
 
-        osc2.connect(gain2);
-        gain2.connect(context.destination);
-        if (audioDest) gain2.connect(audioDest);
-
-        osc2.start(now + 0.1);
-        osc2.stop(now + 0.3);
-      } catch (e) {
-        console.warn("Gagal memutar audio: ", e);
+    // Fungsi menghentikan musik
+    function stopBackgroundMusic() {
+      if (currentSource) {
+        try { currentSource.stop(); } catch(e) {}
+        currentSource = null;
       }
     }
 
@@ -403,6 +429,10 @@ Piala Dunia 2026 dengan 6 Gol</textarea>
         // Update hitungan waktu
         if (!isRecording) {
           elapsedTime = performance.now() - startTime;
+          // Loop preview timeline biasa jika lewat 5 detik
+          if (elapsedTime > 5000) {
+            startTime = performance.now();
+          }
         } else {
           elapsedTime = (recordFrameCount / FPS) * 1000;
           recordFrameCount++;
@@ -423,14 +453,6 @@ Piala Dunia 2026 dengan 6 Gol</textarea>
           let progress = 0;
           if (elapsedTime >= startTimeLine) {
             progress = Math.min((elapsedTime - startTimeLine) / DURATION_PER_LINE, 1);
-          }
-
-          // PERBAIKAN SINKRONISASI UTAMA: Pemicuan suara dikunci dengan progress animasi baris
-          if (progress > 0 && !audioPlayedSet.has(index)) {
-            audioPlayedSet.add(index);
-            // Jika sedang merekam, hitung delay presisi terhadap mulainya rekaman (dalam detik)
-            const delayInSeconds = isRecording ? startTimeLine / 1000 : 0;
-            playSlideSound(delayInSeconds);
           }
 
           const easeOutQuad = 1 - (1 - progress) * (1 - progress);
@@ -521,9 +543,11 @@ Piala Dunia 2026 dengan 6 Gol</textarea>
       requestAnimationFrame(draw);
     }
 
+    // Jalankan loop render awal
+    startTime = performance.now();
     draw();
 
-    // REKAM VIDEO DENGAN AUDIO ANTRIAN PRESET
+    // REKAM VIDEO DENGAN MUSIK LATAR SINKRON
     recordBtn.addEventListener('click', () => {
       if (!bgImage) return;
 
@@ -531,10 +555,12 @@ Piala Dunia 2026 dengan 6 Gol</textarea>
 
       isRecording = true;
       recordFrameCount = 0;
-      audioPlayedSet.clear();
 
       recordBtn.disabled = true;
       statusDiv.innerText = "Merekam animasi video & audio (5 detik)...";
+
+      // Jalankan musik latar tepat saat rekaman dimulai
+      playBackgroundMusic(0);
 
       const canvasStream = canvas.captureStream(FPS);
       let combinedStream = canvasStream;
@@ -562,17 +588,20 @@ Piala Dunia 2026 dengan 6 Gol</textarea>
       };
 
       mediaRecorder.onstop = () => {
+        // Hentikan musik latar setelah proses perekaman selesai
+        stopBackgroundMusic();
+
         const blob = new Blob(chunks, { type: options.mimeType });
         const url = URL.createObjectURL(blob);
         
         const a = document.createElement('a');
         a.href = url;
-        a.download = `Infografis_Animasi_News_${Date.now()}.webm`;
+        a.download = `Infografis_Animasi_News_Audio_${Date.now()}.webm`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
 
-        statusDiv.innerText = "Selesai! Video berhasil diunduh secara sinkron.";
+        statusDiv.innerText = "Selesai! Video dengan musik berhasil diunduh.";
         recordBtn.disabled = false;
         isRecording = false;
         resetAnimation();
