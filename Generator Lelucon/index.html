@@ -361,10 +361,10 @@
 
   // Fungsi utama untuk menampilkan joke ke UI setelah berhasil fetch
   function displayJokeText(jokeText, isFallback = false) {
-    const fallbackNote = isFallback ? '<span class="emoji-indo">ðŸ“–</span> Cadangan Lucu' : '<span class="emoji-indo">ðŸŒ¶ï¸</span> Candaan Asli API';
+    const fallbackNote = isFallback ? '<span class="emoji-indo"></span> Cadangan Lucu' : '<span class="emoji-indo"></span> Candaan Asli API';
     const html = `
       <div class="joke-indo-area">
-        <div class="joke-label">ðŸ˜‚ Lelucon Bahasa Indonesia</div>
+        <div class="joke-label"> Lelucon Bahasa Indonesia</div>
         <div class="joke-text">${escapeHtml(jokeText)}</div>
       </div>
       <div class="joke-meta">
@@ -377,7 +377,7 @@
       </div>
       <div class="button-group">
         <button class="generate-btn" id="newJokeBtn">
-          ðŸŽ²  Lelucon Baru (Auto)  ðŸ”„
+          Lelucon Baru (Auto)
         </button>
       </div>
     `;
