@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Frame & Text Animation Generator (Multi-Style)</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #1e1e24;
+            color: #fff;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container {
+            max-width: 1000px;
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+        @media(min-width: 768px) {
+            .container { grid-template-columns: 380px 1fr; }
+        }
+        .panel-control {
+            background: #2a2a35;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+        .panel-preview {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: #111;
+            padding: 15px;
+            border-radius: 8px;
+            justify-content: center;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+            color: #ccc;
+        }
+        input[type="text"], input[type="number"], input[type="file"], textarea, select {
+            width: 100%;
+            padding: 10px;
+            background: #3a3a47;
+            border: 1px solid #555;
+            color: #fff;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+        textarea {
+            resize: vertical;
+            font-family: inherit;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #e50914;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        button:hover { background: #b80710; }
+        button:disabled { background: #555; cursor: not-allowed; }
+        canvas {
+            max-width: 100%;
+            height: auto;
+            border: 2px dashed #444;
+            cursor: move;
+            background: #000;
+        }
+        .info {
+            font-size: 12px;
+            color: #aaa;
+            margin-top: 5px;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Video Frame & Text Animation Generator</h1>
+    
+    <div class="container">
+        <div class="panel-control">
+            <div class="form-group">
+                <label>1. Upload Foto Background</label>
+                <input type="file" id="uploadImg" accept="image/*">
+            </div>
+            <div class="form-group">
+                <label>1b. Upload Musik Latar (Opsional)</label>
+                <input type="file" id="uploadAudio" accept="audio/*">
+            </div>
+            <div class="form-group">
+                <label>2. Masukkan Teks (Gunakan 'Enter' untuk baris baru)</label>
+                <textarea id="textInput" rows="5">KETERLALUAN!
+Pelari Wanita Jadi Sasaran Komentar
+Tak Pantas Saat Sedang Lari</textarea>
+            </div>
+            <div class="form-group">
+                <label>3. Ukuran Teks (Pixel)</label>
+                <input type="number" id="textSize" value="34" min="10" max="200">
+            </div>
+            <div class="form-group">
+                <label>4. Model / Gaya Desain</label>
+                <select id="textStyle">
+                    <option value="antara">Gaya Balok Putih (Antara News original)</option>
+                    <option value="everest">Gaya Everest (Tanpa blok, Label Biru di Atas)</option>
+                    <option value="highlight">Gaya Highlight (Tulisan Putih, Baris Kedua Berblok Merah)</option>
+                    <option value="margin-line">Gaya Garis Samping (Tulisan Stroke, Garis Vertikal Putih)</option>
+                    <option value="neon">Gaya Cyberpunk Neon (Pendaran Hijau/Cyan)</option>
+                    <option value="gold">Gaya Elegant Gold (Nuansa Emas Mewah)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>5. Jenis Animasi Teks</label>
+                <select id="animType">
+                    <option value="slideLeft">Meluncur dari Kiri (Slide Left)</option>
+                    <option value="slideUp">Muncul dari Bawah (Slide Up)</option>
+                    <option value="dropDown">Jatuh dari Atas (Drop Down)</option>
+                    <option value="scaleIn">Membesar Masuk (Scale In)</option>
+                    <option value="rotateIn">Berputar Masuk (Rotate In)</option>
+                    <option value="fadeIn">Memudar Masuk (Fade In)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <button id="recordBtn" disabled>Generate & Download Video</button>
+            </div>
+            <p class="info">* Geser (drag) teks langsung di dalam kanvas untuk mengatur posisinya (Mendukung Mouse & Touchscreen HP).</p>
+            <div id="status" style="font-weight: bold; color: #ffc107; margin-top: 10px;"></div>
+        </div>
+
+        <div class="panel-preview">
+            <canvas id="videoCanvas" width="600" height="400"></canvas>
+            <p class="info">Preview Real-time</p>
+        </div>
+    </div>
+	<script>
+
+	const canvas = document.getElementById('videoCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    const uploadImg = document.getElementById('uploadImg');
+    const uploadAudio = document.getElementById('uploadAudio'); 
+    const textInput = document.getElementById('textInput');
+    const textSizeInput = document.getElementById('textSize');
+    const textStyleSelect = document.getElementById('textStyle');
+    const animTypeSelect = document.getElementById('animType');
+    const recordBtn = document.getElementById('recordBtn');
+    const statusDiv = document.getElementById('status');
+
+    let bgImage = null;
+    let bgAudio = null; 
+    let isDragging = false;
+    let textGroup = { x: 50, y: 150 };
+    let startX, startY;
+    
+    let textBoundingBox = { x: 0, y: 0, width: 0, height: 0 };
+
+    const TARGET_FPS = 60; 
+    const frameDuration = 1000 / TARGET_FPS;
+    let previewFrame = 0;
+    let currentFrame = 0;           
+    let isRecording = false;
+    let lastTime = 0;
+    let accumulatedTime = 0;
+
+    // --- CUSTOM TRACKING CODE ---
+    function trackVideoGeneration(style, animation, hasAudio) {
+        const payload = {
+            event: "video_generated",
+            timestamp: new Date().toISOString(),
+            design_style: style,
+            animation_type: animation,
+            includes_audio: hasAudio
+        };
+        console.log("Tracking Event Logged:", payload);
+    }
+    // ----------------------------
+
+    function resetAnimation() {
+        if (!isRecording) {
+            previewFrame = 0;
+        }
+    }
+
+    textInput.addEventListener('input', resetAnimation);
+    textSizeInput.addEventListener('input', resetAnimation);
+    textStyleSelect.addEventListener('change', resetAnimation);
+    animTypeSelect.addEventListener('change', resetAnimation);
+
+    uploadImg.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(ev) {
+            bgImage = new Image();
+            bgImage.onload = function() {
+                const MAX_WIDTH = 800; 
+                let w = bgImage.width, h = bgImage.height;
+                if (w > MAX_WIDTH) { h = Math.round(h * MAX_WIDTH / w); w = MAX_WIDTH; }
+                canvas.width = w;
+                canvas.height = h;
+                textGroup.x = canvas.width * 0.08;
+                textGroup.y = canvas.height * 0.42;
+                recordBtn.disabled = false;
+                resetAnimation();
+            };
+            bgImage.src = ev.target.result;
+        };
+        reader.readAsDataURL(file);
+    });
+
+    uploadAudio.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) {
+            bgAudio = null;
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = function(ev) {
+            bgAudio = new Audio(ev.target.result);
+        };
+        reader.readAsDataURL(file);
+    });
+
+    function checkInTextRange(x, y) {
+        return (x >= textBoundingBox.x && x <= textBoundingBox.x + textBoundingBox.width &&
+                y >= textBoundingBox.y && y <= textBoundingBox.y + textBoundingBox.height);
+    }
+
+    function onStart(clientX, clientY) {
+        if (!bgImage) return;
+        const rect = canvas.getBoundingClientRect();
+        const mouseX = (clientX - rect.left) * (canvas.width / rect.width);
+        const mouseY = (clientY - rect.top) * (canvas.height / rect.height);
+
+        if (checkInTextRange(mouseX, mouseY)) {
+            isDragging = true;
+            startX = mouseX - textGroup.x;
+            startY = mouseY - textGroup.y;
+        }
+    }
+
+    function onMove(clientX, clientY) {
+        if (!isDragging) return;
+        const rect = canvas.getBoundingClientRect();
+        textGroup.x = ((clientX - rect.left) * (canvas.width / rect.width)) - startX;
+        textGroup.y = ((clientY - rect.top) * (canvas.height / rect.height)) - startY;
+    }
+
+    canvas.addEventListener('mousedown', (e) => onStart(e.clientX, e.clientY));
+    canvas.addEventListener('mousemove', (e) => onMove(e.clientX, e.clientY));
+    window.addEventListener('mouseup', () => { isDragging = false; });
+    
+    canvas.addEventListener('touchstart', (e) => { 
+        if(e.touches.length === 1) onStart(e.touches[0].clientX, e.touches[0].clientY); 
+    }, { passive: true });
+    
+    canvas.addEventListener('touchmove', (e) => { 
+        if(isDragging && e.touches.length === 1) onMove(e.touches[0].clientX, e.touches[0].clientY); 
+    }, { passive: true });
+    
+    window.addEventListener('touchend', () => { isDragging = false; });
+
+
+    function draw(timestamp = 0) {
+        if (!lastTime) lastTime = timestamp;
+        let delta = timestamp - lastTime;
+        lastTime = timestamp;
+
+        if (delta > 100) delta = 0; 
+        accumulatedTime += delta;
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        if (bgImage) {
+            ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
+
+            const lines = textInput.value.split('\n').filter(l => l.trim() !== "");
+            const baseSize = parseInt(textSizeInput.value) || 34;
+            const currentStyle = textStyleSelect.value;
+            const currentAnim = animTypeSelect.value;
+
+            let currentYOffset = 0;
+            const lineGap = 8; 
+            const framesPerLine = 35; 
+            const delayBetweenLines = 15;
+            const introEndFrame = lines.length * (framesPerLine + delayBetweenLines);
+            
+            // Logika totalFrames untuk pratinjau (Preview Loop) tetap mengikuti durasi 15 detik (900 frame)
+            const totalFrames = 15 * TARGET_FPS; 
+
+            const displayFrame = isRecording ? currentFrame : previewFrame;
+
+            if (currentStyle === 'everest') {
+                ctx.save();
+                ctx.fillStyle = '#0056b3';
+                ctx.fillRect(textGroup.x, textGroup.y - baseSize - 10, 120, 6);
+                ctx.restore();
+            }
+
+            if (currentStyle === 'margin-line') {
+                ctx.save();
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 4;
+                ctx.beginPath();
+                ctx.moveTo(textGroup.x - 15, textGroup.y - baseSize);
+                let totalLineH = 0;
+                lines.forEach((l, i) => { totalLineH += (i === 0 ? baseSize : baseSize * 0.85) + lineGap + 6; });
+                ctx.lineTo(textGroup.x - 15, textGroup.y + totalLineH - baseSize - 10);
+                ctx.stroke();
+                ctx.restore();
+            }
+
+            let maxLineWidth = 0;
+            let firstLineY = textGroup.y - baseSize;
+
+            lines.forEach((line, index) => {
+                const size = index === 0 ? baseSize : Math.round(baseSize * 0.85);
+                const padding = 8; 
+                const startFrame = index * (framesPerLine + delayBetweenLines);
+
+                let progress = Math.max(0, Math.min(1, (displayFrame - startFrame) / framesPerLine));
+                const ease = 1 - Math.pow(1 - progress, 3); 
+
+                let drawX = textGroup.x;
+                let drawY = textGroup.y + currentYOffset;
+                let opacity = ease;
+                let scale = 1;
+                let rotation = 0;
+
+                if (currentAnim === 'slideLeft') {
+                    drawX = textGroup.x - 80 + (80 * ease);
+                } else if (currentAnim === 'slideUp') {
+                    drawY = (textGroup.y + currentYOffset + 30) - (30 * ease);
+                } else if (currentAnim === 'dropDown') {
+                    drawY = (textGroup.y + currentYOffset - 50) + (50 * ease);
+                } else if (currentAnim === 'scaleIn') {
+                    scale = ease;
+                } else if (currentAnim === 'rotateIn') {
+                    rotation = (1 - ease) * -0.2; 
+                    scale = ease;
+                }
+
+                if (displayFrame > introEndFrame) {
+                    let loopFrame = displayFrame - introEndFrame;
+                    let pulse = Math.sin(loopFrame * 0.05) * 0.02; 
+                    scale += pulse;
+                }
+
+                ctx.save();
+                ctx.font = `bold ${size}px 'Segoe UI', Arial, sans-serif`;
+                const textWidth = ctx.measureText(line).width;
+                if (textWidth > maxLineWidth) maxLineWidth = textWidth;
+
+                ctx.translate(drawX + textWidth/2, drawY - size/2);
+                ctx.scale(scale, scale);
+                ctx.rotate(rotation);
+                ctx.translate(-(drawX + textWidth/2), -(drawY - size/2));
+                
+                ctx.globalAlpha = opacity;
+
+                if (currentStyle === 'antara') {
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillRect(drawX - 8, drawY - size - 2, textWidth + 16, size + padding);
+                    ctx.fillStyle = '#000000';
+                    ctx.fillText(line, drawX, drawY);
+                } 
+                else if (currentStyle === 'everest') {
+					if (index === 0)
+						ctx.fillStyle = '#e50914';
+                        ctx.fillRect(drawX - 8, drawY - size - 2, textWidth + 16, size + padding);
+                        ctx.fillStyle = '#ffffff';
+						ctx.fillText(line, drawX, drawY);
+                } 
+                else if (currentStyle === 'highlight') {
+                    if (index === 0) { 
+                        ctx.fillStyle = '#e50914';
+                        ctx.fillRect(drawX - 8, drawY - size - 2, textWidth + 16, size + padding);
+                        ctx.fillStyle = '#ffffff';
+                    } else {
+                        ctx.fillStyle = '#ffffff';
+                    }
+						ctx.fillText(line, drawX, drawY);
+                } 
+                else if (currentStyle === 'margin-line') {
+                    if (index === 0)
+					ctx.fillStyle = 'black';
+					ctx.fillRect(drawX - 8, drawY - size - 2, textWidth + 16, size + padding);
+					ctx.fillStyle = 'yellow';
+                    ctx.fillText(line, drawX, drawY);
+                }
+                else if (currentStyle === 'neon') {
+                    ctx.shadowColor = '#00ffff';
+                    ctx.shadowBlur = 12;
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillText(line, drawX, drawY);
+                    
+                    ctx.strokeStyle = '#00ff66';
+                    ctx.lineWidth = 1;
+                    ctx.strokeText(line, drawX, drawY);
+                }
+                else if (currentStyle === 'gold') {
+                    let gradient = ctx.createLinearGradient(drawX, drawY - size, drawX, drawY);
+                    gradient.addColorStop(0, '#fff3a1');
+                    gradient.addColorStop(0.5, '#ffd700');
+                    gradient.addColorStop(1, '#b8860b');
+                    ctx.fillStyle = gradient;
+                    ctx.shadowColor = 'rgba(0,0,0,0.6)';
+                    ctx.shadowBlur = 4;
+                    ctx.fillText(line, drawX, drawY);
+                }
+
+                ctx.restore();
+                currentYOffset += size + padding + lineGap;
+            });
+
+            textBoundingBox = {
+                x: textGroup.x - 30,
+                y: firstLineY - 30,
+                width: maxLineWidth + 60,
+                height: currentYOffset + 40
+            };
+
+            if (!isRecording) {
+                while (accumulatedTime >= frameDuration) {
+                    previewFrame = (previewFrame + 1) % totalFrames;
+                    accumulatedTime -= frameDuration;
+                }
+            }
+        } else {
+            ctx.fillStyle = '#aaa';
+            ctx.font = '20px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('Silakan upload gambar background terlebih dahulu', canvas.width/2, canvas.height/2);
+        }
+
+        requestAnimationFrame(draw);
+    }
+
+    recordBtn.addEventListener('click', () => {
+        if (!bgImage) return;
+        isRecording = true;
+        recordBtn.disabled = true;
+        statusDiv.textContent = "Sedang memproses perekaman video... Mohon tunggu.";
+        
+        trackVideoGeneration(textStyleSelect.value, animTypeSelect.value, !!bgAudio);
+
+        currentFrame = 0;
+        
+        // MENGUBAH DURASI RECORDING MENJADI PASTI 15 DETIK (15 * 60 FPS = 900 FRAMES)
+        const totalFrames = 15 * TARGET_FPS;
+
+        const videoStream = canvas.captureStream(TARGET_FPS);
+        const outputStream = new MediaStream();
+        
+        videoStream.getVideoTracks().forEach(track => outputStream.addTrack(track));
+
+        if (bgAudio) {
+            bgAudio.currentTime = 0;
+            bgAudio.play();
+            
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const source = audioCtx.createMediaElementSource(bgAudio);
+            const dest = audioCtx.createMediaStreamDestination();
+            source.connect(dest);
+            source.connect(audioCtx.destination); 
+            
+            dest.stream.getAudioTracks().forEach(track => outputStream.addTrack(track));
+        }
+
+        const mediaRecorder = new MediaRecorder(outputStream, { mimeType: 'video/webm;codecs=vp9' });
+        const chunks = [];
+
+        mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) chunks.push(e.data); };
+        mediaRecorder.onstop = () => {
+            if (bgAudio) {
+                bgAudio.pause();
+                bgAudio.currentTime = 0;
+            }
+            
+            const blob = new Blob(chunks, { type: 'video/webm' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `animated_text_${Date.now()}.webm`;
+            a.click();
+            
+            isRecording = false;
+            recordBtn.disabled = false;
+            statusDiv.textContent = "Video berhasil diunduh!";
+            setTimeout(() => statusDiv.textContent = "", 4000);
+        };
+
+        mediaRecorder.start();
+
+        function recordLoop() {
+            if (currentFrame < totalFrames) {
+                currentFrame++;
+                setTimeout(recordLoop, 1000 / TARGET_FPS);
+            } else {
+                mediaRecorder.stop();
+            }
+        }
+        recordLoop();
+    });
+
+    requestAnimationFrame(draw);
+	</script>
+</body>
+</html>
