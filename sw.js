@@ -1,5 +1,4 @@
-const CACHE_NAME = 'Video Generator
-';
+const CACHE_NAME = 'Video Generator';
 const urlsToCache = [
   '/Video-Generator/',
   '/Video-Generator/index.html',
